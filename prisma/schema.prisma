@@ -16,6 +16,7 @@ enum ApprovalStatus {
   PENDING
   APPROVED
   DECLINED
+  SUSPENDED
 }
 
 model Student {
@@ -35,4 +36,11 @@ model Admin {
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+}
+
+model BookAsset {
+  id         String   @id @default("after-see-book")
+  filename   String
+  uploadedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
