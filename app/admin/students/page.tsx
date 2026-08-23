@@ -120,6 +120,12 @@ export default async function Students({
                     <button>Reinstate</button>
                   </form>
                 )}
+
+                {student.approvalStatus === "DECLINED" && (
+                  <form action={setApproval.bind(null, student.id, "APPROVED")}>
+                    <button>Approve</button>
+                  </form>
+                )}
               </div>
             </article>
           ))
