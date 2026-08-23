@@ -1,3 +1,2 @@
-import { auth } from "@/auth"; import { prisma } from "@/lib/prisma"; import { readFile } from "fs/promises"; import path from "path";
-export const runtime="nodejs";
-export async function GET(){const session=await auth();if(session?.user.role!=="student")return new Response("Unauthorized",{status:401});const student=await prisma.student.findUnique({where:{id:session.user.id}});if(student?.approvalStatus!=="APPROVED"||student.selectedCourse!=="AFTER_SEE")return new Response("Access denied",{status:403});const asset=await prisma.bookAsset.findUnique({where:{id:"after-see-book"}});if(!asset)return new Response("Book not uploaded yet",{status:404});try{const pdf=await readFile(path.join(process.cwd(),"storage","after-see-book.pdf"));return new Response(pdf,{headers:{"Content-Type":"application/pdf","Content-Disposition":`inline; filename="${asset.filename.replaceAll('"','')}"`}})}catch{return new Response("Book file unavailable",{status:404})}}
+// This legacy filename is deliberately blocked. Book content is rendered only by the protected viewer route.
+export async function GET() { return new Response("Book downloads are unavailable.", { status: 403 }); }
