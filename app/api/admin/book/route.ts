@@ -1,3 +1,47 @@
-import { auth } from "@/auth"; import { prisma } from "@/lib/prisma"; import { NextResponse } from "next/server"; import { mkdir, writeFile } from "fs/promises"; import path from "path";
-export const runtime="nodejs";
-export async function POST(request:Request){if((await auth())?.user.role!=="admin")return NextResponse.redirect(new URL("/admin/login",request.url));const data=await request.formData();const file=data.get("book");if(!(file instanceof File)||!file.name.toLowerCase().endsWith(".pdf")||file.type!=="application/pdf")return NextResponse.redirect(new URL("/admin/book?error=Only%20PDF%20files%20are%20allowed.",request.url));if(file.size>50*1024*1024)return NextResponse.redirect(new URL("/admin/book?error=The%20PDF%20must%20be%2050MB%20or%20smaller.",request.url));const folder=path.join(process.cwd(),"storage");await mkdir(folder,{recursive:true});await writeFile(path.join(folder,"after-see-book.pdf"),Buffer.from(await file.arrayBuffer()));await prisma.bookAsset.upsert({where:{id:"after-see-book"},update:{filename:file.name,uploadedAt:new Date()},create:{id:"after-see-book",filename:file.name}});return NextResponse.redirect(new URL("/admin/book?uploaded=1",request.url));}
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
+
+export const runtime = "nodejs";
+
+export async function POST(request: Request) {
+  if ((await auth())?.user.role !== "admin") {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
+  const data = await request.formData();
+  const file = data.get("book");
+
+  if (
+    !(file instanceof File) ||
+    !file.name.toLowerCase().endsWith(".pdf") ||
+    file.type !== "application/pdf"
+  ) {
+    return NextResponse.redirect(
+      new URL("/admin/book?error=Only%20PDF%20files%20are%20allowed.", request.url)
+    );
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    return NextResponse.redirect(
+      new URL("/admin/book?error=The%20PDF%20must%20be%2050MB%20or%20smaller.", request.url)
+    );
+  }
+
+  const folder = path.join(process.cwd(), "storage");
+  await mkdir(folder, { recursive: true });
+  await writeFile(
+    path.join(folder, "after-see-book.pdf"),
+    Buffer.from(await file.arrayBuffer())
+  );
+
+  await prisma.bookAsset.upsert({
+    where: { id: "after-see-book" },
+    update: { filename: file.name, uploadedAt: new Date() },
+    create: { id: "after-see-book", filename: file.name },
+  });
+
+  return NextResponse.redirect(new URL("/admin/book?uploaded=1", request.url));
+}
