@@ -12,6 +12,7 @@ const tabs: { id: CourseTab; label: string }[] = [
 
 export function CourseTabs() {
   const [activeTab, setActiveTab] = useState<CourseTab>("book");
+  const [bookOpen, setBookOpen] = useState(false);
 
   return (
     <section className="course-tabs">
@@ -21,7 +22,10 @@ export function CourseTabs() {
             key={tab.id}
             type="button"
             className={activeTab === tab.id ? "active" : ""}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              if (tab.id !== "book") setBookOpen(false);
+            }}
             aria-selected={activeTab === tab.id}
             role="tab"
           >
@@ -37,7 +41,31 @@ export function CourseTabs() {
             <h2>Book</h2>
             <p>Read your After SEE study book in StepUp Academy.</p>
           </div>
-          <BookViewer />
+
+          {bookOpen ? (
+            <>
+              <button
+                type="button"
+                className="button small"
+                style={{ marginBottom: 14 }}
+                onClick={() => setBookOpen(false)}
+              >
+                ← Close book
+              </button>
+              <BookViewer />
+            </>
+          ) : (
+            <div className="book-launch">
+              <p>Ready to study? Open your book whenever you are.</p>
+              <button
+                type="button"
+                className="button"
+                onClick={() => setBookOpen(true)}
+              >
+                Open Book
+              </button>
+            </div>
+          )}
         </section>
       </div>
 
