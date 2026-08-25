@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookViewer } from "@/components/book-viewer";
+import { CourseTabs } from "@/components/course-tabs";
 
 export default async function Course() {
   const session = await auth();
@@ -81,29 +81,7 @@ export default async function Course() {
         Start strong. Your book is ready to read below.
       </p>
 
-      <section className="book-section">
-        <div>
-          <span>01</span>
-          <h2>Book</h2>
-          <p>
-            Read your After SEE study book in StepUp Academy.
-          </p>
-        </div>
-
-        <BookViewer />
-      </section>
-
-      <section className="course-card mock">
-        <span>02</span>
-
-        <h2>Mock Test</h2>
-
-        <p>
-          Put your preparation to the test.
-        </p>
-
-        <div className="soon">Coming soon</div>
-      </section>
+      <CourseTabs />
     </main>
   );
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AdminNav } from "@/components/admin-nav";
 import { createAdmin } from "../actions";
+import { PasswordInput } from "@/components/password-input";
 
 export default async function Admins({
   searchParams,
@@ -42,9 +43,8 @@ export default async function Admins({
 
         <form action={createAdmin} className="form compact">
           <input name="email" type="email" placeholder="Admin email" required />
-          <input
+          <PasswordInput
             name="password"
-            type="password"
             minLength={8}
             placeholder="Password (8+ characters)"
             required

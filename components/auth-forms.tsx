@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { PasswordInput } from "@/components/password-input";
 
 const courses = [
   ["AFTER_SEE", "After SEE"],
@@ -111,9 +112,8 @@ export function RegisterForm() {
           required
         />
 
-        <input
+        <PasswordInput
           name="password"
-          type="password"
           placeholder="Password (8+ characters)"
           autoComplete="new-password"
           minLength={8}
@@ -218,9 +218,8 @@ export function LoginForm({ admin = false }: { admin?: boolean }) {
           required
         />
 
-        <input
+        <PasswordInput
           name="password"
-          type="password"
           placeholder="Password"
           autoComplete="current-password"
           required

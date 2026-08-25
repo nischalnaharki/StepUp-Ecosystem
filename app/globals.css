@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap");
 
+.course-tabs { margin-top: 40px; }
+.course-tab-nav { display: flex; gap: 8px; border-bottom: 1px solid var(--line); }
+.course-tab-nav button { background: transparent; border: 0; border-bottom: 3px solid transparent; border-radius: 0; color: #53615c; padding: 13px 16px 10px; }
+.course-tab-nav button.active { border-color: var(--orange); color: var(--ink); }
+.course-tabs [role="tabpanel"] { min-height: 320px; }
+
 :root {
   --ink: #102221;
   --paper: #f7f5ee;
@@ -194,6 +200,45 @@ button {
   border-radius: 6px;
   font: inherit;
   background: #fff;
+}
+
+.password-field {
+  position: relative;
+}
+
+.form .password-field input {
+  padding-right: 48px;
+}
+
+.form .password-toggle {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  min-width: 0;
+  margin: 6px 0 0;
+  padding: 7px;
+  border: 0;
+  border-radius: 5px;
+  color: #53615c;
+  background: transparent;
+}
+
+.password-toggle:hover {
+  color: var(--ink);
+  background: #edf0e8;
+}
+
+.password-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .form button {
