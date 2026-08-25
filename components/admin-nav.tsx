@@ -5,6 +5,7 @@ const links = [
   { href: "/admin/students", label: "All Students" },
   { href: "/admin/book", label: "Manage Book" },
   { href: "/admin/admins", label: "Manage Admins" },
+  { href: "/admin/activity", label: "Activity Log" },
 ];
 
 export function AdminNav() {

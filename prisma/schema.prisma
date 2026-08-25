@@ -19,6 +19,15 @@ enum ApprovalStatus {
   SUSPENDED
 }
 
+enum ActivityAction {
+  APPROVE
+  DECLINE
+  SUSPEND
+  REINSTATE
+  COURSE_CHANGE
+  DELETE
+}
+
 model Student {
   id             String         @id @default(cuid())
   name           String
@@ -43,4 +52,17 @@ model BookAsset {
   filename   String
   uploadedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model ActivityLog {
+  id           String         @id @default(cuid())
+  adminId      String
+  adminEmail   String
+  action       ActivityAction
+  studentId    String?
+  studentName  String
+  studentEmail String
+  createdAt    DateTime       @default(now())
+
+  @@index([createdAt])
 }

@@ -5,6 +5,15 @@
 .course-tab-nav button { background: transparent; border: 0; border-bottom: 3px solid transparent; border-radius: 0; color: #53615c; padding: 13px 16px 10px; }
 .course-tab-nav button.active { border-color: var(--orange); color: var(--ink); }
 .course-tabs [role="tabpanel"] { min-height: 320px; }
+.selection-bar { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:25px 0 12px; font-size:13px; font-weight:700; }
+.selection-bar > div { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.selection-bar button { padding:8px 10px; }
+.selection-bar .export-button { margin-left:auto; background:#fff; color:var(--ink); border-color:var(--line); }
+.row-check { display:grid; place-items:center; }
+.row-check input,.selection-bar input { width:16px; height:16px; accent-color:var(--ink); }
+.directory article { grid-template-columns:auto minmax(0,1fr) auto; }
+.delete { background:#fff; color:#b13a2a; border-color:#e3bbb4; }
+.activity-table time { color:#63716c; font-size:12px; white-space:nowrap; }
 
 :root {
   --ink: #102221;
