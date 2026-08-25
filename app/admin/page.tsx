@@ -41,7 +41,7 @@ export default async function Admin() {
       <AdminNav />
 
       <header>
-        s
+        <p className="eyebrow">STEPUP ACADEMY · ADMIN</p>
         <h1>Pending registrations</h1>
         <p>Review student access requests.</p>
       </header>
