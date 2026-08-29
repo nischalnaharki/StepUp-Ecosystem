@@ -846,6 +846,17 @@ button {
   accent-color: var(--ink);
 }
 
+.content-list { display: grid; gap: 14px; margin-top: 28px; }
+.content-group { padding: 18px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.content-group-header, .content-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.content-row { padding: 12px 0; border-top: 1px solid var(--line); }
+.inline-form { display: flex; flex: 1; gap: 8px; align-items: center; flex-wrap: wrap; }
+.inline-form input { flex: 1; min-width: 180px; padding: 10px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+.inline-form button, .row button { padding: 9px 11px; }
+.add-content { margin-top: 14px; }
+.form textarea { width: 100%; min-height: 110px; padding: 14px; margin-top: 12px; border: 1px solid #cbd4c9; border-radius: 6px; font: inherit; resize: vertical; }
+.module-section { margin-top: 28px; }.module-section h2 { font-size: 28px; letter-spacing: -0.05em; }.video-topic { margin: 12px 0; padding: 16px 18px; background: #fff; border: 1px solid var(--line); border-radius: 9px; }.video-topic summary { font-weight: 800; cursor: pointer; }.video-topic ul, .link-list { padding-left: 20px; }.video-topic li, .link-list li { margin: 10px 0; }.video-topic a, .link-list a, .notice-card a { color: #234d49; text-decoration: underline; font-weight: 700; }.notice-list { display: grid; gap: 14px; }.notice-card { padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: 10px; }.notice-card time { font: 500 12px "DM Mono"; color: var(--orange); }.notice-card h3 { margin: 8px 0; font-size: 19px; }.notice-card p { white-space: pre-wrap; line-height: 1.6; color: #53615c; }
+
 /* Responsive */
 
 @media (max-width: 760px) {

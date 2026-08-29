@@ -28,6 +28,9 @@ enum ActivityAction {
   MOCKTEST_UPDATE
   MOCKTEST_PUBLISH
   MOCKTEST_DELETE
+  CONTENT_CREATE
+  CONTENT_UPDATE
+  CONTENT_DELETE
 }
 
 enum AttemptStatus {
@@ -52,16 +55,71 @@ model Student {
 }
 
 model Course {
-  id          String    @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
-  slug        String    @unique
-  hasBook     Boolean   @default(false)
-  hasMockTest Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  slug        String       @unique
+  hasBook     Boolean      @default(false)
+  hasMockTest Boolean      @default(false)
+  hasVideos   Boolean      @default(false)
+  hasNotes    Boolean      @default(false)
+  hasNotices  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
   students    Student[]
   mockTests   MockTest[]
+  videoTopics VideoTopic[]
+  noteLinks   NoteLink[]
+  notices     Notice[]
 
   @@map("courses")
+}
+
+model VideoTopic {
+  id       String  @id @default(cuid())
+  courseId String
+  course   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name     String
+  order    Int
+  videos   Video[]
+
+  @@index([courseId])
+  @@unique([courseId, order])
+}
+
+model Video {
+  id           String     @id @default(cuid())
+  videoTopicId String
+  videoTopic   VideoTopic @relation(fields: [videoTopicId], references: [id], onDelete: Cascade)
+  title        String
+  url          String
+  order        Int
+
+  @@index([videoTopicId])
+  @@unique([videoTopicId, order])
+}
+
+model NoteLink {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  order     Int
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@unique([courseId, order])
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  url       String?
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([courseId, createdAt])
 }
 
 model MockTest {
