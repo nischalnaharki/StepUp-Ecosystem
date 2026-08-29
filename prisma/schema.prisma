@@ -47,6 +47,9 @@ model Student {
   courseId        String
   course          Course         @relation(fields: [courseId], references: [id])
   attempts        Attempt[]
+  videoProgress   VideoProgress[]
+  noteProgress    NoteProgress[]
+  liveClassAttendance LiveClassAttendance[]
   approvalStatus ApprovalStatus @default(PENDING)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -63,12 +66,14 @@ model Course {
   hasVideos   Boolean      @default(false)
   hasNotes    Boolean      @default(false)
   hasNotices  Boolean      @default(false)
+  hasLiveClasses Boolean   @default(false)
   createdAt   DateTime     @default(now())
   students    Student[]
   mockTests   MockTest[]
   videoTopics VideoTopic[]
   noteLinks   NoteLink[]
   notices     Notice[]
+  liveClasses LiveClass[]
 
   @@map("courses")
 }
@@ -85,6 +90,17 @@ model VideoTopic {
   @@unique([courseId, order])
 }
 
+model VideoProgress {
+  studentId String
+  videoId   String
+  seenAt    DateTime?
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  video     Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, videoId])
+  @@index([videoId])
+}
+
 model Video {
   id           String     @id @default(cuid())
   videoTopicId String
@@ -92,6 +108,7 @@ model Video {
   title        String
   url          String
   order        Int
+  progress     VideoProgress[]
 
   @@index([videoTopicId])
   @@unique([videoTopicId, order])
@@ -105,9 +122,21 @@ model NoteLink {
   url       String
   order     Int
   createdAt DateTime @default(now())
+  progress  NoteProgress[]
 
   @@index([courseId])
   @@unique([courseId, order])
+}
+
+model NoteProgress {
+  studentId  String
+  noteLinkId String
+  seenAt     DateTime?
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  noteLink   NoteLink @relation(fields: [noteLinkId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, noteLinkId])
+  @@index([noteLinkId])
 }
 
 model Notice {
@@ -120,6 +149,30 @@ model Notice {
   createdAt DateTime @default(now())
 
   @@index([courseId, createdAt])
+}
+
+model LiveClass {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  body      String?
+  createdAt DateTime @default(now())
+  attendance LiveClassAttendance[]
+
+  @@index([courseId, createdAt])
+}
+
+model LiveClassAttendance {
+  studentId  String
+  liveClassId String
+  attendedAt DateTime?
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  liveClass  LiveClass @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, liveClassId])
+  @@index([liveClassId])
 }
 
 model MockTest {

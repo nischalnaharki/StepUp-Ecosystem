@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { scoreAttempt } from "@/lib/mock-test-scoring";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth(); if (session?.user.role !== "student" || !session.user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -17,5 +18,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const complete = body.complete === true;
   await prisma.attempt.update({ where: { id }, data: { answers: answers as Prisma.InputJsonValue, flaggedQuestionIds: flaggedQuestionIds as Prisma.InputJsonValue, timeRemainingSeconds, ...(complete ? { status: "COMPLETED", completedAt: new Date() } : {}) } });
   const scored = complete ? await scoreAttempt(id) : null;
+  if (complete) revalidatePath("/course", "layout");
   return NextResponse.json({ ok: true, score: scored?.score, maxPossibleScore: scored?.maxPossibleScore });
 }

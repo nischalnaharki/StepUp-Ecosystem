@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -33,6 +34,9 @@ export async function POST(request: Request) {
         courseId,
       },
     });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/students");
 
     return NextResponse.json({ ok: true });
   } catch {

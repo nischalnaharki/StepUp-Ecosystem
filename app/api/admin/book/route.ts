@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
@@ -42,6 +43,9 @@ export async function POST(request: Request) {
     update: { filename: file.name, uploadedAt: new Date() },
     create: { id: "after-see-book", filename: file.name },
   });
+
+  revalidatePath("/admin/book");
+  revalidatePath("/course", "layout");
 
   return NextResponse.redirect(new URL("/admin/book?uploaded=1", request.url));
 }

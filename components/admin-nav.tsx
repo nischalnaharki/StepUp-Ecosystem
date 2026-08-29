@@ -7,6 +7,7 @@ const links = [
   { href: "/admin/mock-tests", label: "Mock Tests" },
   { href: "/admin/videos", label: "Videos" },
   { href: "/admin/notes", label: "Notes" },
+  { href: "/admin/live-classes", label: "Live Classes" },
   { href: "/admin/notices", label: "Notices" },
   { href: "/admin/book", label: "Manage Book" },
   { href: "/admin/admins", label: "Manage Admins" },

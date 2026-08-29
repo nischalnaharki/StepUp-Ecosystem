@@ -10,7 +10,7 @@ import { rescoreMockTest } from "@/lib/mock-test-scoring";
 type TestDefinition = { courseId: string; name: string; timeLimitMinutes: number | null; negativeMarkingPercent: number | null; isPublished: boolean; leaderboardHidden: boolean; sections: { name: string; pointsPerQuestion: number; questions: { text: string; options: string[]; correctOptionIndex: number }[] }[] };
 
 async function requireAdmin() { const session = await auth(); if (session?.user.role !== "admin" || !session.user.id || !session.user.email) throw new Error("Unauthorized"); return { id: session.user.id, email: session.user.email }; }
-function refresh() { revalidatePath("/admin/mock-tests"); revalidatePath("/admin/activity"); }
+function refresh() { revalidatePath("/admin/mock-tests"); revalidatePath("/admin/activity"); revalidatePath("/course", "layout"); }
 async function log(admin: { id: string; email: string }, action: ActivityAction, test: { id: string; name: string; course: { name: string } }) { await prisma.activityLog.create({ data: { adminId: admin.id, adminEmail: admin.email, action, studentId: test.id, studentName: test.name, studentEmail: test.course.name } }); }
 
 function parseDefinition(formData: FormData): TestDefinition {

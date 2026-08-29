@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PasswordInput } from "@/components/password-input";
 
 /* ─────────────────────────────────────────────
@@ -247,9 +248,9 @@ export function LoginForm({ admin = false }: { admin?: boolean }) {
 
           <p className="fine">
             New here?{" "}
-            <a href="/register">
+            <Link href="/register">
               Create an account
-            </a>
+            </Link>
           </p>
         </>
       )}
