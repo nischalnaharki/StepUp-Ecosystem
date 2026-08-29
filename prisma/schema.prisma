@@ -30,6 +30,11 @@ enum ActivityAction {
   MOCKTEST_DELETE
 }
 
+enum AttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
 model Student {
   id             String         @id @default(cuid())
   name           String
@@ -38,6 +43,7 @@ model Student {
   googleId       String?        @unique
   courseId        String
   course          Course         @relation(fields: [courseId], references: [id])
+  attempts        Attempt[]
   approvalStatus ApprovalStatus @default(PENDING)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -69,8 +75,27 @@ model MockTest {
   leaderboardHidden      Boolean    @default(false)
   createdAt              DateTime   @default(now())
   sections               Section[]
+  attempts               Attempt[]
 
   @@index([courseId])
+}
+
+model Attempt {
+  id                   String        @id @default(cuid())
+  studentId            String
+  student              Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  mockTestId           String
+  mockTest             MockTest      @relation(fields: [mockTestId], references: [id], onDelete: Cascade)
+  status               AttemptStatus @default(IN_PROGRESS)
+  answers              Json          @default("{}")
+  flaggedQuestionIds   Json          @default("[]")
+  questionOrder        Json
+  startedAt            DateTime      @default(now())
+  completedAt          DateTime?
+  timeRemainingSeconds Int?
+
+  @@index([studentId, mockTestId, status])
+  @@index([mockTestId])
 }
 
 model Section {

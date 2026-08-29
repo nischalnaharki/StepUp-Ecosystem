@@ -22,7 +22,10 @@ export default async function Course() {
     return <main className="course"><p className="eyebrow">STEPUP ACADEMY</p><h1>{student.course.name}</h1><section className="empty"><h2>Coming soon</h2><p>We&apos;re preparing this course for you. Stay tuned!</p></section></main>;
   }
 
-  return <main className="course"><p className="eyebrow">STEPUP ACADEMY · {student.course.name.toUpperCase()}</p><h1>Welcome, {student.name.split(" ")[0]}!</h1><p className="lead">Choose a module to continue learning.</p><CourseTabs hasBook={student.course.hasBook} hasMockTest={student.course.hasMockTest} /></main>;
+  const mockTests = student.course.hasMockTest ? await prisma.mockTest.findMany({ where: { courseId: student.courseId, isPublished: true }, include: { sections: { include: { _count: { select: { questions: true } } } }, attempts: { where: { studentId: student.id }, orderBy: { startedAt: "desc" }, select: { status: true } } }, orderBy: { createdAt: "desc" } }) : [];
+  const availableTests = mockTests.map((test) => ({ id: test.id, name: test.name, questionCount: test.sections.reduce((total, section) => total + section._count.questions, 0), timeLimitMinutes: test.timeLimitMinutes, status: test.attempts.find((attempt) => attempt.status === "IN_PROGRESS") ? "IN_PROGRESS" as const : test.attempts.length ? "COMPLETED" as const : "NOT_STARTED" as const }));
+
+  return <main className="course"><p className="eyebrow">STEPUP ACADEMY · {student.course.name.toUpperCase()}</p><h1>Welcome, {student.name.split(" ")[0]}!</h1><p className="lead">Choose a module to continue learning.</p><CourseTabs hasBook={student.course.hasBook} hasMockTest={student.course.hasMockTest} mockTests={availableTests} /></main>;
 }
 
 function Gate({ title, text }: { title: string; text: string }) {
