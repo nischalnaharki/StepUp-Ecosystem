@@ -93,6 +93,8 @@ model Attempt {
   startedAt            DateTime      @default(now())
   completedAt          DateTime?
   timeRemainingSeconds Int?
+  score                Float?
+  maxPossibleScore     Float?
 
   @@index([studentId, mockTestId, status])
   @@index([mockTestId])

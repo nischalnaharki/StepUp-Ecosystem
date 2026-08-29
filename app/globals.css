@@ -797,6 +797,17 @@ button {
 .attempt-controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .attempt-controls > div { display: flex; gap: 8px; }
 .active-flag { border-color: var(--orange); }
+.results-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+.score-card { max-width: 320px; text-align: center; }
+.score-card strong { display: block; font-size: 48px; }
+.review-list { display: grid; gap: 14px; margin-top: 24px; }
+.review-question { max-width: none; }
+.wrong-option { color: #b13a2a; font-weight: 700; }
+.leaderboard { max-width: 650px; margin: 26px 0; }
+.leaderboard ol { margin: 0; padding: 0; list-style: none; }
+.leaderboard li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.leaderboard li.you { background: #f1f8df; margin: 0 -12px; padding: 12px; }
+.your-rank { margin-top: 18px; font-weight: 700; }
 
 .course-form {
   display: grid;

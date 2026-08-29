@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { scoreAttempt } from "@/lib/mock-test-scoring";
 import { NextResponse } from "next/server";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -15,5 +16,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const timeRemainingSeconds = body.timeRemainingSeconds === null || (Number.isInteger(body.timeRemainingSeconds) && body.timeRemainingSeconds >= 0) ? body.timeRemainingSeconds : attempt.timeRemainingSeconds;
   const complete = body.complete === true;
   await prisma.attempt.update({ where: { id }, data: { answers: answers as Prisma.InputJsonValue, flaggedQuestionIds: flaggedQuestionIds as Prisma.InputJsonValue, timeRemainingSeconds, ...(complete ? { status: "COMPLETED", completedAt: new Date() } : {}) } });
-  return NextResponse.json({ ok: true });
+  const scored = complete ? await scoreAttempt(id) : null;
+  return NextResponse.json({ ok: true, score: scored?.score, maxPossibleScore: scored?.maxPossibleScore });
 }
