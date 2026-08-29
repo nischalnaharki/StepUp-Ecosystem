@@ -1,0 +1,30 @@
+"use server";
+
+import { auth } from "@/auth";
+import { ActivityAction } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+type TestDefinition = { courseId: string; name: string; timeLimitMinutes: number | null; negativeMarkingPercent: number | null; isPublished: boolean; leaderboardHidden: boolean; sections: { name: string; pointsPerQuestion: number; questions: { text: string; options: string[]; correctOptionIndex: number }[] }[] };
+
+async function requireAdmin() { const session = await auth(); if (session?.user.role !== "admin" || !session.user.id || !session.user.email) throw new Error("Unauthorized"); return { id: session.user.id, email: session.user.email }; }
+function refresh() { revalidatePath("/admin/mock-tests"); revalidatePath("/admin/activity"); }
+async function log(admin: { id: string; email: string }, action: ActivityAction, test: { id: string; name: string; course: { name: string } }) { await prisma.activityLog.create({ data: { adminId: admin.id, adminEmail: admin.email, action, studentId: test.id, studentName: test.name, studentEmail: test.course.name } }); }
+
+function parseDefinition(formData: FormData): TestDefinition {
+  let value: unknown;
+  try { value = JSON.parse(String(formData.get("definition") || "")); } catch { throw new Error("The test data could not be read."); }
+  const test = value as TestDefinition;
+  if (!test || typeof test.courseId !== "string" || !test.name?.trim() || !Array.isArray(test.sections) || !test.sections.length) throw new Error("Choose a course, name the test, and add at least one section.");
+  if (test.timeLimitMinutes !== null && (!Number.isInteger(test.timeLimitMinutes) || test.timeLimitMinutes <= 0)) throw new Error("Time limit must be a positive whole number.");
+  if (test.negativeMarkingPercent !== null && (!Number.isFinite(test.negativeMarkingPercent) || test.negativeMarkingPercent < 0 || test.negativeMarkingPercent > 100)) throw new Error("Negative marking must be between 0 and 100.");
+  test.sections.forEach((section, sectionIndex) => { if (!section.name?.trim() || !Number.isFinite(section.pointsPerQuestion) || section.pointsPerQuestion <= 0) throw new Error(`Section ${sectionIndex + 1} needs a name and positive points per question.`); section.questions.forEach((question, questionIndex) => { if (!question.text?.trim()) throw new Error(`Section ${sectionIndex + 1}, question ${questionIndex + 1} needs question text.`); if (!Array.isArray(question.options) || question.options.length !== 4 || question.options.some((option) => !option?.trim())) throw new Error(`Section ${sectionIndex + 1}, question ${questionIndex + 1} needs exactly four non-empty options.`); if (!Number.isInteger(question.correctOptionIndex) || question.correctOptionIndex < 0 || question.correctOptionIndex > 3) throw new Error(`Section ${sectionIndex + 1}, question ${questionIndex + 1} has an invalid correct option.`); }); });
+  return test;
+}
+async function ensureCourse(courseId: string) { const course = await prisma.course.findFirst({ where: { id: courseId, hasMockTest: true }, select: { id: true } }); if (!course) throw new Error("Choose a course with Mock Test enabled."); }
+const sectionsData = (test: TestDefinition) => test.sections.map((section, sectionIndex) => ({ name: section.name.trim(), pointsPerQuestion: section.pointsPerQuestion, order: sectionIndex, questions: { create: section.questions.map((question, questionIndex) => ({ text: question.text.trim(), options: question.options.map((option) => option.trim()), correctOptionIndex: question.correctOptionIndex, order: questionIndex })) } }));
+
+export async function createMockTest(formData: FormData) { const admin = await requireAdmin(); let test: TestDefinition; try { test = parseDefinition(formData); await ensureCourse(test.courseId); } catch (error) { redirect(`/admin/mock-tests/new?error=${encodeURIComponent(error instanceof Error ? error.message : "Unable to create mock test.")}`); } const created = await prisma.mockTest.create({ data: { courseId: test!.courseId, name: test!.name.trim(), timeLimitMinutes: test!.timeLimitMinutes, negativeMarkingPercent: test!.negativeMarkingPercent, isPublished: test!.isPublished, leaderboardHidden: test!.leaderboardHidden, sections: { create: sectionsData(test!) }, }, include: { course: { select: { name: true } } } }); await log(admin, test!.isPublished ? "MOCKTEST_PUBLISH" : "MOCKTEST_CREATE", created); refresh(); redirect(`/admin/mock-tests/${created.id}?saved=1`); }
+export async function updateMockTest(id: string, formData: FormData) { const admin = await requireAdmin(); let test: TestDefinition; let previous: { isPublished: boolean } | null; try { test = parseDefinition(formData); await ensureCourse(test.courseId); previous = await prisma.mockTest.findUnique({ where: { id }, select: { isPublished: true } }); if (!previous) throw new Error("Mock test not found."); } catch (error) { redirect(`/admin/mock-tests/${id}?error=${encodeURIComponent(error instanceof Error ? error.message : "Unable to update mock test.")}`); } const updated = await prisma.$transaction(async (tx) => { await tx.section.deleteMany({ where: { mockTestId: id } }); return tx.mockTest.update({ where: { id }, data: { courseId: test!.courseId, name: test!.name.trim(), timeLimitMinutes: test!.timeLimitMinutes, negativeMarkingPercent: test!.negativeMarkingPercent, isPublished: test!.isPublished, leaderboardHidden: test!.leaderboardHidden, sections: { create: sectionsData(test!) } }, include: { course: { select: { name: true } } } }); }); await log(admin, !previous!.isPublished && test!.isPublished ? "MOCKTEST_PUBLISH" : "MOCKTEST_UPDATE", updated); refresh(); redirect(`/admin/mock-tests/${id}?saved=1`); }
+export async function deleteMockTest(id: string) { const admin = await requireAdmin(); const test = await prisma.mockTest.delete({ where: { id }, include: { course: { select: { name: true } } } }); await log(admin, "MOCKTEST_DELETE", test); refresh(); redirect("/admin/mock-tests?deleted=1"); }

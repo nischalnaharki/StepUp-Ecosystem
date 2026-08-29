@@ -4,6 +4,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/course-tabs";
 
+// Module flags are admin-managed, so always read the student's current course record.
+export const dynamic = "force-dynamic";
+
 export default async function Course() {
   const session = await auth();
   if (!session) redirect("/login");

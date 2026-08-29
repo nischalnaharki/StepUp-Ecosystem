@@ -24,6 +24,10 @@ enum ActivityAction {
   COURSE_CREATE
   COURSE_UPDATE
   COURSE_DELETE
+  MOCKTEST_CREATE
+  MOCKTEST_UPDATE
+  MOCKTEST_PUBLISH
+  MOCKTEST_DELETE
 }
 
 model Student {
@@ -49,8 +53,50 @@ model Course {
   hasMockTest Boolean   @default(false)
   createdAt   DateTime  @default(now())
   students    Student[]
+  mockTests   MockTest[]
 
   @@map("courses")
+}
+
+model MockTest {
+  id                     String     @id @default(cuid())
+  courseId               String
+  course                 Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name                   String
+  timeLimitMinutes       Int?
+  negativeMarkingPercent Float?
+  isPublished            Boolean    @default(false)
+  leaderboardHidden      Boolean    @default(false)
+  createdAt              DateTime   @default(now())
+  sections               Section[]
+
+  @@index([courseId])
+}
+
+model Section {
+  id                String     @id @default(cuid())
+  mockTestId        String
+  mockTest          MockTest   @relation(fields: [mockTestId], references: [id], onDelete: Cascade)
+  name              String
+  pointsPerQuestion Float
+  order             Int
+  questions         Question[]
+
+  @@index([mockTestId])
+  @@unique([mockTestId, order])
+}
+
+model Question {
+  id                 String  @id @default(cuid())
+  sectionId          String
+  section            Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  text               String
+  options            String[]
+  correctOptionIndex Int
+  order              Int
+
+  @@index([sectionId])
+  @@unique([sectionId, order])
 }
 
 model Admin {
