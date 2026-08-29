@@ -15,7 +15,7 @@ async function main() {
   await prisma.admin.upsert({
     where: { email: email.toLowerCase() },
     update: { passwordHash },
-    create: { email: email.toLowerCase(), passwordHash },
+    create: { name: "StepUp Admin", email: email.toLowerCase(), passwordHash },
   });
 
   console.log("Admin account ready.");

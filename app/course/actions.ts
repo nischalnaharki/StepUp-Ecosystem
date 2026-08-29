@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 
 async function currentStudent() {
   const session = await auth();
@@ -13,6 +14,28 @@ async function currentStudent() {
 }
 
 function refreshCourse() { revalidatePath("/course", "layout"); }
+
+export type ProfileResult = { error?: string; success?: string };
+
+export async function updateStudentProfile(_: ProfileResult, formData: FormData): Promise<ProfileResult> {
+  const session = await auth();
+  if (session?.user.role !== "student" || !session.user.id) return { error: "You need to sign in again." };
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const currentPassword = String(formData.get("currentPassword") || "");
+  const newPassword = String(formData.get("newPassword") || "");
+  if (!name || name.length > 100) return { error: "Enter a name of up to 100 characters." };
+  if (!/^\S+@\S+\.\S+$/.test(email)) return { error: "Enter a valid email address." };
+  if (newPassword && newPassword.length < 8) return { error: "Your new password must be at least 8 characters." };
+  const student = await prisma.student.findUnique({ where: { id: session.user.id } });
+  if (!student) return { error: "Account not found." };
+  if (student.passwordHash && newPassword && !(await bcrypt.compare(currentPassword, student.passwordHash))) return { error: "Your current password is incorrect." };
+  const duplicate = await prisma.student.findFirst({ where: { email, NOT: { id: student.id } }, select: { id: true } });
+  if (duplicate) return { error: "That email address is already in use." };
+  await prisma.student.update({ where: { id: student.id }, data: { name, email, ...(newPassword ? { passwordHash: await bcrypt.hash(newPassword, 12) } : {}) } });
+  refreshCourse();
+  return { success: "Settings saved." };
+}
 
 export async function toggleVideoSeen(videoId: string) {
   const student = await currentStudent();

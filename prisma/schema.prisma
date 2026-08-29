@@ -239,6 +239,7 @@ model Question {
 
 model Admin {
   id           String   @id @default(cuid())
+  name         String   @default("StepUp Admin")
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())

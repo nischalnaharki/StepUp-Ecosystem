@@ -42,6 +42,7 @@ export default async function Admins({
         {params.created && <p className="success">Admin account created.</p>}
 
         <form action={createAdmin} className="form compact">
+          <input name="name" placeholder="Admin name" />
           <input name="email" type="email" placeholder="Admin email" required />
           <PasswordInput
             name="password"
@@ -57,7 +58,8 @@ export default async function Admins({
         {admins.map((admin) => (
           <article key={admin.id}>
             <div>
-              <h2>{admin.email}</h2>
+              <h2>{admin.name}</h2>
+              <p>{admin.email}</p>
               <p>Created {admin.createdAt.toLocaleDateString()}</p>
             </div>
           </article>

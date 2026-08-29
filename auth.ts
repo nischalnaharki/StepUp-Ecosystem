@@ -17,7 +17,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({ id: "admin-credentials", name: "Admin login", credentials: { email: {}, password: {} }, async authorize(c) {
       const admin = await prisma.admin.findUnique({ where: { email: String(c?.email).toLowerCase() } });
       if (!admin || !(await bcrypt.compare(String(c?.password), admin.passwordHash))) return null;
-      return { id: admin.id, email: admin.email, name: "StepUp Admin", role: "admin" };
+      return { id: admin.id, email: admin.email, name: admin.name, role: "admin" };
     }})
   ],
   callbacks: {
