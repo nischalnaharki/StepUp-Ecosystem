@@ -21,6 +21,9 @@ enum ActivityAction {
   REINSTATE
   COURSE_CHANGE
   DELETE
+  COURSE_CREATE
+  COURSE_UPDATE
+  COURSE_DELETE
 }
 
 model Student {

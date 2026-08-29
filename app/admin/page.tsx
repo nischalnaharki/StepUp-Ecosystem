@@ -3,12 +3,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AdminNav } from "@/components/admin-nav";
 import { StudentTable } from "@/components/student-table";
-import { ApprovalStatus, Prisma, Student } from "@prisma/client";
+import { ApprovalStatus, Course, Student } from "@prisma/client";
 
 type StatusTotal = { approvalStatus: ApprovalStatus; _count: number };
-type CourseWithStudentCount = Prisma.CourseGetPayload<{
-  include: { _count: { select: { students: true } } };
-}>;
+type CourseWithStudentCount = Course & { _count: { students: number } };
 
 export default async function Admin() {
   if ((await auth())?.user.role !== "admin") redirect("/admin/login");
