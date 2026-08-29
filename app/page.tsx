@@ -17,7 +17,7 @@ export default function Home() {
       <section className="hero hero-upgraded">
         <div className="hero-copy">
           <p className="eyebrow"><span /> MADE FOR NEB STUDENTS</p>
-          <h1>From SEE to your<br /><em>next big step.</em></h1>
+          <h1>From SEE to your<br /><em> Bachelors</em></h1>
           <p className="lead">Your bridge to +2: clear notes, focused lessons, and exam-ready preparation that makes every study session count.</p>
           <div className="actions">
             <Link className="button" href="/register">Start learning <span aria-hidden="true">→</span></Link>
