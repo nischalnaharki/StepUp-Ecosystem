@@ -19,6 +19,7 @@ export default async function Course() {
     where: {
       id: session.user.id,
     },
+    include: { course: true },
   });
 
   if (!student) {
@@ -52,13 +53,13 @@ export default async function Course() {
     );
   }
 
-  if (student.selectedCourse !== "AFTER_SEE") {
+  if (!student.course.hasBook) {
     return (
       <main className="course">
         <p className="eyebrow">STEPUP ACADEMY</p>
 
         <h1>
-          {student.selectedCourse === "CLASS_11" ? "Class 11" : "Class 12"}
+          {student.course.name}
         </h1>
 
         <section className="empty">

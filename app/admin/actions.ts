@@ -2,7 +2,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { ActivityAction, ApprovalStatus, Course } from "@prisma/client";
+import { ActivityAction, ApprovalStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { sendApprovalNotification } from "@/lib/notifications";
@@ -26,7 +26,7 @@ export async function bulkSetApproval(ids: string[], status: "APPROVED" | "DECLI
   await Promise.all(students.map((student) => sendApprovalNotification(student, status))); refreshStudents();
 }
 
-export async function updateCourse(id: string, formData: FormData) { const admin = await requireAdmin(); const course = formData.get("course"); if (!Object.values(Course).includes(course as Course)) throw new Error("Invalid course"); const student = await prisma.student.update({ where: { id }, data: { selectedCourse: course as Course } }); await logAction(admin, "COURSE_CHANGE", student); refreshStudents(); }
+export async function updateCourse(id: string, formData: FormData) { const admin = await requireAdmin(); const courseId = String(formData.get("courseId") || ""); if (!courseId || !(await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } }))) throw new Error("Invalid course"); const student = await prisma.student.update({ where: { id }, data: { courseId } }); await logAction(admin, "COURSE_CHANGE", student); refreshStudents(); }
 
 export async function deleteStudent(id: string) { const admin = await requireAdmin(); const student = await prisma.student.delete({ where: { id } }); await logAction(admin, "DELETE", student); refreshStudents(); }
 

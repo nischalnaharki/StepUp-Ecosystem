@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Course {
-  AFTER_SEE
-  CLASS_11
-  CLASS_12
-}
 enum ApprovalStatus {
   PENDING
   APPROVED
@@ -34,10 +29,25 @@ model Student {
   email          String         @unique
   passwordHash   String?
   googleId       String?        @unique
-  selectedCourse Course
+  courseId        String
+  course          Course         @relation(fields: [courseId], references: [id])
   approvalStatus ApprovalStatus @default(PENDING)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+
+  @@index([courseId])
+}
+
+model Course {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  hasBook     Boolean   @default(false)
+  hasMockTest Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  students    Student[]
+
+  @@map("courses")
 }
 
 model Admin {

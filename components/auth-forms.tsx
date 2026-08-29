@@ -5,17 +5,11 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/components/password-input";
 
-const courses = [
-  ["AFTER_SEE", "After SEE"],
-  ["CLASS_11", "Class 11"],
-  ["CLASS_12", "Class 12"],
-] as const;
-
 /* ─────────────────────────────────────────────
    Register Form
 ───────────────────────────────────────────── */
 
-export function RegisterForm() {
+export function RegisterForm({ courses }: { courses: { id: string; name: string }[] }) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
@@ -57,7 +51,7 @@ export function RegisterForm() {
 
     const course = (
       document.querySelector(
-        "select[name=course]"
+        "select[name=courseId]"
       ) as HTMLSelectElement | null
     )?.value;
 
@@ -72,7 +66,7 @@ export function RegisterForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ course }),
+        body: JSON.stringify({ courseId: course }),
       });
 
       if (!response.ok) {
@@ -121,14 +115,14 @@ export function RegisterForm() {
         />
 
         <select
-          name="course"
-          defaultValue="AFTER_SEE"
+          name="courseId"
+          defaultValue={courses[0]?.id}
           aria-label="Select your course"
           required
         >
-          {courses.map(([value, label]) => (
-            <option value={value} key={value}>
-              {label}
+          {courses.map((course) => (
+            <option value={course.id} key={course.id}>
+              {course.name}
             </option>
           ))}
         </select>

@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { Course } from "@prisma/client";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(80),
   email: z.string().email(),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  course: z.nativeEnum(Course),
+  courseId: z.string().cuid(),
 });
 
 export async function POST(request: Request) {
@@ -19,15 +18,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
 
-  const { name, email, password, course } = parsed.data;
+  const { name, email, password, courseId } = parsed.data;
 
   try {
+    if (!(await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } }))) {
+      return NextResponse.json({ error: "Choose a valid course." }, { status: 400 });
+    }
+
     await prisma.student.create({
       data: {
         name,
         email: email.toLowerCase(),
         passwordHash: await bcrypt.hash(password, 12),
-        selectedCourse: course,
+        courseId,
       },
     });
 

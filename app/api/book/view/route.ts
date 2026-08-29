@@ -14,9 +14,10 @@ export async function GET() {
 
   const student = await prisma.student.findUnique({
     where: { id: session.user.id },
+    include: { course: true },
   });
 
-  if (student?.approvalStatus !== "APPROVED" || student.selectedCourse !== "AFTER_SEE") {
+  if (student?.approvalStatus !== "APPROVED" || !student.course.hasBook) {
     return new Response("Access denied", { status: 403 });
   }
 
