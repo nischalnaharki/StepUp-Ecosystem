@@ -22,7 +22,7 @@ export async function GET() {
   }
 
   const bookAsset = await prisma.bookAsset.findUnique({
-    where: { id: "after-see-book" },
+    where: { courseId: student.courseId },
   });
 
   if (!bookAsset) {
@@ -30,7 +30,7 @@ export async function GET() {
   }
 
   try {
-    const pdf = await readFile(path.join(process.cwd(), "storage", "after-see-book.pdf"));
+    const pdf = await readFile(path.join(process.cwd(), "storage", bookAsset.storageFilename));
 
     return new Response(pdf, {
       headers: {

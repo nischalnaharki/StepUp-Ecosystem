@@ -74,6 +74,7 @@ model Course {
   noteLinks   NoteLink[]
   notices     Notice[]
   liveClasses LiveClass[]
+  bookAsset   BookAsset?
 
   @@map("courses")
 }
@@ -246,10 +247,13 @@ model Admin {
 }
 
 model BookAsset {
-  id         String   @id @default("after-see-book")
-  filename   String
-  uploadedAt DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(cuid())
+  courseId        String   @unique
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  filename        String
+  storageFilename String
+  uploadedAt      DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model ActivityLog {
