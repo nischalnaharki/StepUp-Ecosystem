@@ -44,6 +44,7 @@ model Student {
   email          String         @unique
   passwordHash   String?
   googleId       String?        @unique
+  activeSessionId String?
   courseId        String
   course          Course         @relation(fields: [courseId], references: [id])
   attempts        Attempt[]

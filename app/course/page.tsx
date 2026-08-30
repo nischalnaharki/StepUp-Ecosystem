@@ -7,8 +7,8 @@ import { CourseTabs } from "@/components/course-tabs";
 export const dynamic = "force-dynamic";
 
 export default async function Course() {
-  const session = await auth(); if (!session) redirect("/login"); if (session.user.role !== "student") redirect("/admin");
-  const student = await prisma.student.findUnique({ where: { id: session.user.id }, include: { course: true } }); if (!student) redirect("/login");
+  const session = await auth(); if (!session) redirect("/login?error=signed-in-elsewhere"); if (session.user.role !== "student") redirect("/admin");
+  const student = await prisma.student.findUnique({ where: { id: session.user.id }, include: { course: true } }); if (!student) redirect("/login?error=signed-in-elsewhere");
   if (student.approvalStatus === "PENDING") return <Gate title="Registration pending" text="Your registration is awaiting admin approval. Please check back soon." />;
   if (student.approvalStatus === "DECLINED") return <Gate title="Registration declined" text="Your registration was not approved. Contact StepUp Academy if you believe this is a mistake." />;
   if (student.approvalStatus === "SUSPENDED") return <Gate title="Access suspended" text="Your access has been suspended. Contact StepUp Academy support for help." />;

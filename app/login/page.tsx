@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/auth-forms";
 
-export default function Login() {
+export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   return (
     <main className="auth-page">
       <Link className="back" href="/">
@@ -9,7 +10,7 @@ export default function Login() {
       </Link>
 
       <section className="auth-container">
-        <LoginForm />
+        <LoginForm loggedOutElsewhere={error === "signed-in-elsewhere"} />
       </section>
     </main>
   );

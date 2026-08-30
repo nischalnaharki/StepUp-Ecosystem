@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { randomUUID } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
@@ -21,21 +22,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }})
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider !== "google") return true;
-      const email = user.email?.toLowerCase(); if (!email) return false;
-      let existing = await prisma.student.findUnique({ where: { email } });
-      if (!existing) {
-        const courseSlug = (await cookies()).get("stepup-google-course")?.value;
-        if (!courseSlug) return "/register?error=google-course";
-        const course = await prisma.course.findUnique({ where: { slug: courseSlug } });
-        if (!course) return "/register?error=google-course";
-        existing = await prisma.student.create({ data: { name: user.name || "StepUp Student", email, googleId: account.providerAccountId, courseId: course.id } });
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const email = user.email?.toLowerCase(); if (!email) return false;
+        let existing = await prisma.student.findUnique({ where: { email } });
+        if (!existing) {
+          const courseSlug = (await cookies()).get("stepup-google-course")?.value;
+          if (!courseSlug) return "/register?error=google-course";
+          const course = await prisma.course.findUnique({ where: { slug: courseSlug } });
+          if (!course) return "/register?error=google-course";
+          existing = await prisma.student.create({ data: { name: user.name || "StepUp Student", email, googleId: account.providerAccountId, courseId: course.id } });
+        }
+        user.id = existing.id; user.role = "student"; user.status = existing.approvalStatus; user.course = existing.courseId;
       }
-      user.id = existing.id; user.role = "student"; user.status = existing.approvalStatus; user.course = existing.courseId;
+
+      // A new student login replaces the only valid session marker for that account.
+      // Admin JWTs deliberately have no marker and are never checked here.
+      if (user.role === "student") {
+        const sessionId = randomUUID();
+        await prisma.student.update({ where: { id: user.id! }, data: { activeSessionId: sessionId } });
+        user.sessionId = sessionId;
+      }
       return true;
     },
-    async jwt({ token, user }) { if (user) { token.sub = user.id; token.role = user.role; token.status = user.status; token.course = user.course; } return token; },
+    async jwt({ token, user }) {
+      if (user) { token.sub = user.id; token.role = user.role; token.status = user.status; token.course = user.course; token.sessionId = user.sessionId; }
+      if (token.role === "student") {
+        const student = await prisma.student.findUnique({ where: { id: token.sub! }, select: { activeSessionId: true } });
+        if (!student || !token.sessionId || student.activeSessionId !== token.sessionId) return null;
+      }
+      return token;
+    },
     async session({ session, token }) { session.user.id = token.sub!; session.user.role = token.role as "student" | "admin"; session.user.status = token.status as string | undefined; session.user.course = token.course as string | undefined; return session; }
   },
   pages: { signIn: "/login" }

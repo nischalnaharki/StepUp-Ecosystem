@@ -36,6 +36,7 @@ export function BookViewer() {
           fetch("/api/book/view", { credentials: "same-origin", cache: "no-store" }),
           fetch("/api/book/progress", { credentials: "same-origin", cache: "no-store" }),
         ]);
+        if (response.status === 403 || progressResponse.status === 403) { window.location.assign("/login?error=signed-in-elsewhere"); return; }
         if (!response.ok) throw new Error(response.status === 404 ? "The book has not been uploaded yet." : "You do not have access to this book.");
         const savedProgress = progressResponse.ok ? await progressResponse.json() : { page: 1, markedPage: null };
         const savedPage = Number(savedProgress.page) || 1;

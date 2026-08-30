@@ -155,8 +155,8 @@ export function RegisterForm({ courses }: { courses: { id: string; name: string 
    Login Form
 ───────────────────────────────────────────── */
 
-export function LoginForm({ admin = false }: { admin?: boolean }) {
-  const [message, setMessage] = useState("");
+export function LoginForm({ admin = false, loggedOutElsewhere = false }: { admin?: boolean; loggedOutElsewhere?: boolean }) {
+  const [message, setMessage] = useState(loggedOutElsewhere ? "You've been logged out because your account was signed in elsewhere." : "");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
