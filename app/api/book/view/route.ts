@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { readFile } from "fs/promises";
-import path from "path";
+import { readBookPdf } from "@/lib/book-storage";
 
 export const runtime = "nodejs";
 
@@ -30,7 +29,7 @@ export async function GET() {
   }
 
   try {
-    const pdf = await readFile(path.join(process.cwd(), "storage", bookAsset.storageFilename));
+    const pdf = await readBookPdf(bookAsset.storageFilename);
 
     return new Response(pdf, {
       headers: {

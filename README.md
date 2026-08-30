@@ -20,6 +20,7 @@ Copy `.env.example` to `.env` and fill in:
 - `DATABASE_URL` — your Neon or Supabase Postgres connection string (must include `?sslmode=require`)
 - `AUTH_SECRET` — a random secret (generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` — from Google Cloud Console
+- `BLOB_READ_WRITE_TOKEN` — required on Vercel for persistent, private book PDF storage. Create and connect a Vercel Blob store to the project; Vercel adds this variable automatically.
 
 In the Google Cloud Console, add this as an **authorized redirect URI**:
 http://localhost:3000/api/auth/callback/google
@@ -67,4 +68,5 @@ Visit `http://localhost:3000`.
 ## Notes
 
 - PDF uploads are limited to 50 MB, PDF files only.
+- Local development stores PDFs in `storage/`; Vercel deployments store them in the connected private Vercel Blob store. After connecting Blob and deploying, upload the book once to move it from the old local-only storage.
 - Student access statuses: `PENDING`, `APPROVED`, `DECLINED`, `SUSPENDED`.
