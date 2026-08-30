@@ -11,8 +11,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({ allowDangerousEmailAccountLinking: false }),
     Credentials({ id: "student-credentials", name: "Student login", credentials: { email: {}, password: {} }, async authorize(c) {
-      const student = await prisma.student.findUnique({ where: { email: String(c?.email).toLowerCase() } });
-      if (!student?.passwordHash || !(await bcrypt.compare(String(c?.password), student.passwordHash))) return null;
+      const email = String(c?.email ?? "").trim().toLowerCase();
+      const password = String(c?.password ?? "");
+      const student = await prisma.student.findUnique({ where: { email } });
+
+      // A student may have joined with Google and set a password later.  Login
+      // eligibility for this provider is deliberately based only on passwordHash:
+      // googleId is an alternate sign-in method, not a credentials restriction.
+      if (!student?.passwordHash) return null;
+      const passwordMatches = await bcrypt.compare(password, student.passwordHash);
+      if (!passwordMatches) return null;
+
       return { id: student.id, name: student.name, email: student.email, role: "student", status: student.approvalStatus, course: student.courseId };
     }}),
     Credentials({ id: "admin-credentials", name: "Admin login", credentials: { email: {}, password: {} }, async authorize(c) {
