@@ -50,6 +50,7 @@ model Student {
   videoProgress   VideoProgress[]
   noteProgress    NoteProgress[]
   liveClassAttendance LiveClassAttendance[]
+  bookProgress   BookProgress[]
   approvalStatus ApprovalStatus @default(PENDING)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -254,6 +255,19 @@ model BookAsset {
   storageFilename String
   uploadedAt      DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  progress        BookProgress[]
+}
+
+model BookProgress {
+  studentId   String
+  bookAssetId String
+  page        Int      @default(1)
+  updatedAt   DateTime @updatedAt
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  bookAsset   BookAsset @relation(fields: [bookAssetId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, bookAssetId])
+  @@index([bookAssetId])
 }
 
 model ActivityLog {
