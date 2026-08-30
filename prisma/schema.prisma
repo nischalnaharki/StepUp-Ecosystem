@@ -262,6 +262,7 @@ model BookProgress {
   studentId   String
   bookAssetId String
   page        Int      @default(1)
+  markedPage  Int?
   updatedAt   DateTime @updatedAt
   student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   bookAsset   BookAsset @relation(fields: [bookAssetId], references: [id], onDelete: Cascade)

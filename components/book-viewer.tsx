@@ -9,10 +9,11 @@ export function BookViewer() {
   const [message, setMessage] = useState("Loading book…");
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [markedPage, setMarkedPage] = useState<number | null>(null);
   const [pageInput, setPageInput] = useState("1");
 
-  const savePage = useCallback((page: number) => {
-    void fetch("/api/book/progress", { method: "PUT", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ page }), keepalive: true });
+  const savePage = useCallback((page: number, mark?: number | null) => {
+    void fetch("/api/book/progress", { method: "PUT", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ page, ...(mark !== undefined ? { markedPage: mark } : {}) }), keepalive: true });
   }, []);
   const setActivePage = useCallback((page: number, save = true) => {
     currentPageRef.current = page;
@@ -36,17 +37,21 @@ export function BookViewer() {
           fetch("/api/book/progress", { credentials: "same-origin", cache: "no-store" }),
         ]);
         if (!response.ok) throw new Error(response.status === 404 ? "The book has not been uploaded yet." : "You do not have access to this book.");
-        const savedPage = progressResponse.ok ? Number((await progressResponse.json()).page) || 1 : 1;
+        const savedProgress = progressResponse.ok ? await progressResponse.json() : { page: 1, markedPage: null };
+        const savedPage = Number(savedProgress.page) || 1;
         const data = new Uint8Array(await response.arrayBuffer());
         const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
         pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.min.mjs", import.meta.url).toString();
         const pdf = await pdfjs.getDocument({ data }).promise;
         if (cancelled || !container.current) return;
 
-        const saved = Math.max(1, Math.min(pdf.numPages, savedPage));
+        const savedMark = Number(savedProgress.markedPage);
+        const validMarkedPage = Number.isInteger(savedMark) && savedMark >= 1 && savedMark <= pdf.numPages ? savedMark : null;
+        const saved = validMarkedPage ?? Math.max(1, Math.min(pdf.numPages, savedPage));
         container.current.replaceChildren();
         pages.current = [];
         setTotalPages(pdf.numPages);
+        setMarkedPage(validMarkedPage);
         setActivePage(saved, false);
         for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
           const page = await pdf.getPage(pageNumber);
@@ -85,12 +90,20 @@ export function BookViewer() {
     const page = Number(pageInput);
     if (Number.isInteger(page)) goToPage(page); else setPageInput(String(currentPage));
   };
+  const toggleMark = (checked: boolean) => {
+    const nextMark = checked ? currentPage : null;
+    setMarkedPage(nextMark);
+    savePage(currentPage, nextMark);
+  };
 
   return <section className="book-viewer" onContextMenu={(event) => event.preventDefault()}>
     {totalPages > 0 && <div className="book-navigation" aria-label="Book navigation">
+      <button type="button" className="secondary small" onClick={() => goToPage(1)} disabled={currentPage === 1}>⇤ First page</button>
       <button type="button" className="secondary small" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>← Previous</button>
       <form onSubmit={submitPage}><label htmlFor="book-page">Page</label><input id="book-page" type="number" inputMode="numeric" min="1" max={totalPages} value={pageInput} onChange={(event) => setPageInput(event.target.value)} aria-label={`Current page, of ${totalPages}`} /><span>of {totalPages}</span></form>
       <button type="button" className="secondary small" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>Next →</button>
+      <label className="book-mark"><input type="checkbox" checked={markedPage === currentPage} onChange={(event) => toggleMark(event.target.checked)} /> Mark page</label>
+      {markedPage && markedPage !== currentPage && <button type="button" className="secondary small" onClick={() => goToPage(markedPage)}>Marked page {markedPage}</button>}
       <p aria-live="polite">Page {currentPage} of {totalPages}</p>
     </div>}
     {message && <p className="book-message">{message}</p>}

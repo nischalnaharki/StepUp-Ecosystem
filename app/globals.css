@@ -510,17 +510,19 @@ button {
   -webkit-user-select: none;
 }
 
-.book-navigation { position: sticky; top: 12px; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 12px; background: #f8faf5ef; border-bottom: 1px solid var(--line); }
+.book-navigation { position: fixed; left: 50%; bottom: 16px; z-index: 10; width: min(calc(100% - 32px), 920px); transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 12px; background: #f8faf5f7; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px #10222125; }
 .book-navigation form { display: flex; align-items: center; gap: 6px; }
 .book-navigation label, .book-navigation span, .book-navigation p { color: #53615c; font-size: 14px; }
 .book-navigation input { width: 58px; padding: 7px 6px; text-align: center; }
 .book-navigation p { margin: 0 0 0 6px; font-weight: 600; }
+.book-navigation .book-mark { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
+.book-navigation .book-mark input { width: auto; }
 
 .book-pages {
   display: grid;
   gap: 16px;
   justify-content: center;
-  padding: 18px;
+  padding: 18px 18px 128px;
 }
 
 .book-pages canvas {
@@ -540,7 +542,7 @@ button {
   color: #53615c;
 }
 
-@media (max-width: 560px) { .book-navigation { gap: 8px; } .book-navigation p { width: 100%; text-align: center; margin-left: 0; } }
+@media (max-width: 560px) { .book-navigation { bottom: 8px; width: calc(100% - 16px); gap: 8px; } .book-navigation p { width: 100%; text-align: center; margin-left: 0; } .book-pages { padding-bottom: 190px; } }
 
 .mock {
   margin-top: 18px;
