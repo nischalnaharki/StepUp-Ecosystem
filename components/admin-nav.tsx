@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from "@/components/logout-button";
 
 const links = [
   { href: "/admin", label: "Dashboard" },
@@ -40,6 +41,7 @@ export function AdminNav() {
             </Link>
           ))}
         </div>
+        <LogoutButton className="admin-logout" />
       </div>
     </nav>
   );

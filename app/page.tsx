@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+  if (session?.user.role === "student") redirect("/course");
+  if (session?.user.role === "admin") redirect("/admin");
+
   return (
     <main className="landing-page">
       <nav className="nav">

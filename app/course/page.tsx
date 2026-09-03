@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/course-tabs";
+import { LogoutButton } from "@/components/logout-button";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function Course() {
     course.hasNotices ? prisma.notice.findMany({ where: { courseId: student.courseId }, orderBy: { createdAt: "desc" } }) : [],
   ]);
   const availableTests = mockTests.map(test => ({ id: test.id, name: test.name, questionCount: test.sections.reduce((total, section) => total + section._count.questions, 0), timeLimitMinutes: test.timeLimitMinutes, status: test.attempts.find(attempt => attempt.status === "IN_PROGRESS") ? "IN_PROGRESS" as const : test.attempts.length ? "COMPLETED" as const : "NOT_STARTED" as const }));
-  return <main className="course"><p className="eyebrow">STEPUP ACADEMY · {course.name.toUpperCase()}</p><h1>Welcome, {student.name.split(" ")[0]}!</h1><p className="lead">Choose a module to continue learning.</p><CourseTabs hasBook={course.hasBook} hasMockTest={course.hasMockTest} hasVideos={course.hasVideos} hasNotes={course.hasNotes} hasLiveClasses={course.hasLiveClasses} hasNotices={course.hasNotices} studentName={student.name} studentEmail={student.email} hasPassword={Boolean(student.passwordHash)} mockTests={availableTests} videoTopics={videoTopics.map((topic) => ({ ...topic, videos: topic.videos.map((video) => ({ id: video.id, title: video.title, url: video.url, seen: video.progress.length > 0 })) }))} notes={notes.map((note) => ({ id: note.id, title: note.title, url: note.url, seen: note.progress.length > 0 }))} liveClasses={liveClasses.map((liveClass) => ({ id: liveClass.id, title: liveClass.title, url: liveClass.url, body: liveClass.body, createdAt: liveClass.createdAt, attended: liveClass.attendance.length > 0 }))} notices={notices} /></main>;
+  return <main className="course"><div className="course-heading"><div><p className="eyebrow">STEPUP ACADEMY · {course.name.toUpperCase()}</p><h1>Welcome, {student.name.split(" ")[0]}!</h1><p className="lead">Choose a module to continue learning.</p></div><LogoutButton /></div><CourseTabs hasBook={course.hasBook} hasMockTest={course.hasMockTest} hasVideos={course.hasVideos} hasNotes={course.hasNotes} hasLiveClasses={course.hasLiveClasses} hasNotices={course.hasNotices} studentName={student.name} studentEmail={student.email} hasPassword={Boolean(student.passwordHash)} mockTests={availableTests} videoTopics={videoTopics.map((topic) => ({ ...topic, videos: topic.videos.map((video) => ({ id: video.id, title: video.title, url: video.url, seen: video.progress.length > 0 })) }))} notes={notes.map((note) => ({ id: note.id, title: note.title, url: note.url, seen: note.progress.length > 0 }))} liveClasses={liveClasses.map((liveClass) => ({ id: liveClass.id, title: liveClass.title, url: liveClass.url, body: liveClass.body, createdAt: liveClass.createdAt, attended: liveClass.attendance.length > 0 }))} notices={notices} /></main>;
 }
 
-function Gate({ title, text }: { title: string; text: string }) { return <main className="auth-page"><section className="card centered"><h1>{title}</h1><p>{text}</p><Link className="button" href="/">Back home</Link></section></main>; }
+function Gate({ title, text }: { title: string; text: string }) { return <main className="auth-page"><section className="card centered"><h1>{title}</h1><p>{text}</p><LogoutButton /><Link className="button" href="/">Back home</Link></section></main>; }

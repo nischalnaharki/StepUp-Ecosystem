@@ -923,9 +923,7 @@ button {
     padding: 16px;
   }
 
-  .nav > div:last-child > a:first-child {
-    display: none;
-  }
+  .nav-actions { gap: 14px !important; }
 
   .hero {
     padding: 75px 24px 90px;
@@ -1047,10 +1045,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .admin-nav-inner { max-width: 1132px; margin: auto; display: flex; align-items: center; gap: 20px; }
 .admin-brand { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 14px; }
 .admin-brand-mark { display: grid; width: 24px; height: 24px; place-items: center; color: var(--ink); background: var(--lime); border: 1px solid var(--ink); border-radius: 6px; font: 800 13px Manrope, sans-serif; }
-.admin-nav-links { display: flex; gap: 4px; overflow-x: auto; padding: 2px; }
+.admin-nav-links { display: flex; flex: 1 1 auto; min-width: 0; gap: 4px; overflow-x: auto; padding: 2px; }
 .admin-nav a:not(.admin-brand) { white-space: nowrap; padding: 7px 9px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 12px; }
 .admin-nav a:not(.admin-brand):hover { background: #e9eee5; color: var(--ink); }
 .admin-nav a.active { color: var(--ink); background: var(--lime); }
+.logout-button { flex: 0 0 auto; padding: 9px 13px; border: 1px solid var(--ink); border-radius: 7px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.logout-button:hover:not(:disabled) { background: var(--ink); color: #fff; }
+.course-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.course-heading .logout-button { margin-top: 5px; }
 .admin header { max-width: 700px; }
 .admin h1 { font-size: clamp(38px, 5vw, 58px); }
 .stats { grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 14px; }
@@ -1067,4 +1069,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   .admin-nav { margin-top: -32px; margin-bottom: 30px; }
   .admin-nav-inner { gap: 12px; }
   .admin-brand > span:last-child { display: none; }
+  .admin-logout { padding: 8px 10px; font-size: 12px; }
+  .course-heading { gap: 14px; }
+  .course-heading .logout-button { margin-top: 0; }
 }
