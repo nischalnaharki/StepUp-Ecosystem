@@ -1020,7 +1020,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .hero .eyebrow, .course > .eyebrow, .admin header .eyebrow { color: var(--ink-soft); font-weight: 500; }
 .lead { color: #465956; }
 
-.auth-page { display: grid; grid-template-rows: auto 1fr; }
+.auth-page { display: flex; flex-direction: column; }
+.auth-page > .back { align-self: flex-start; }
+.auth-page > .card { width: min(100%, 540px); max-width: none; margin: 32px auto; }
 .auth-container { display: grid; place-items: center; padding: 28px 0 72px; }
 .card { margin: 0; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); }
 .form-header { padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }

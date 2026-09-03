@@ -174,6 +174,14 @@ export function LoginForm({ admin = false, loggedOutElsewhere = false }: { admin
         {
           email: form.get("email"),
           password: form.get("password"),
+          ...(admin
+            ? {
+                luckyNumber: form.get("luckyNumber"),
+                dobBs: form.get("dobBs"),
+                favoriteColor: form.get("favoriteColor"),
+                currentCollege: form.get("currentCollege"),
+              }
+            : {}),
           redirect: false,
         }
       );
@@ -219,6 +227,15 @@ export function LoginForm({ admin = false, loggedOutElsewhere = false }: { admin
           autoComplete="current-password"
           required
         />
+
+        {admin && (
+          <>
+            <input name="luckyNumber" type="password" placeholder="Admin lucky number" autoComplete="off" inputMode="numeric" required />
+            <input name="dobBs" type="password" placeholder="Date of birth (BS)" autoComplete="off" required />
+            <input name="favoriteColor" type="password" placeholder="Favourite color" autoComplete="off" required />
+            <input name="currentCollege" type="password" placeholder="Current college" autoComplete="off" required />
+          </>
+        )}
       </div>
 
       {message && (

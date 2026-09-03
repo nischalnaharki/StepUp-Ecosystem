@@ -241,11 +241,15 @@ model Question {
 }
 
 model Admin {
-  id           String   @id @default(cuid())
-  name         String   @default("StepUp Admin")
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
+  id               String   @id @default(cuid())
+  name             String   @default("StepUp Admin")
+  email            String   @unique
+  passwordHash     String
+  luckyNumberHash  String?
+  dobBsHash        String?
+  favoriteColorHash String?
+  currentCollegeHash String?
+  createdAt        DateTime @default(now())
 }
 
 model BookAsset {

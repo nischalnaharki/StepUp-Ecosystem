@@ -6,6 +6,37 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 
+function normalizedAnswer(value: unknown) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+async function hasValidAdminVerification(
+  admin: { luckyNumberHash: string | null; dobBsHash: string | null; favoriteColorHash: string | null; currentCollegeHash: string | null },
+  credentials: Record<string, unknown> | undefined,
+) {
+  const answers = {
+    luckyNumber: normalizedAnswer(credentials?.luckyNumber),
+    dobBs: normalizedAnswer(credentials?.dobBs),
+    favoriteColor: normalizedAnswer(credentials?.favoriteColor),
+    currentCollege: normalizedAnswer(credentials?.currentCollege),
+  };
+  const hashes = [admin.luckyNumberHash, admin.dobBsHash, admin.favoriteColorHash, admin.currentCollegeHash];
+
+  if (hashes.every(Boolean)) {
+    return (await Promise.all([
+      bcrypt.compare(answers.luckyNumber, admin.luckyNumberHash!),
+      bcrypt.compare(answers.dobBs, admin.dobBsHash!),
+      bcrypt.compare(answers.favoriteColor, admin.favoriteColorHash!),
+      bcrypt.compare(answers.currentCollege, admin.currentCollegeHash!),
+    ])).every(Boolean);
+  }
+
+  // Existing accounts can use the temporary environment configuration until
+  // their individual verification answers are added through account management.
+  const expected = [process.env.ADMIN_LUCKY_NUMBER, process.env.ADMIN_DOB_BS, process.env.ADMIN_FAVORITE_COLOR, process.env.ADMIN_CURRENT_COLLEGE];
+  return expected.every((answer, index) => Boolean(answer) && [answers.luckyNumber, answers.dobBs, answers.favoriteColor, answers.currentCollege][index] === normalizedAnswer(answer));
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   providers: [
@@ -24,9 +55,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return { id: student.id, name: student.name, email: student.email, role: "student", status: student.approvalStatus, course: student.courseId };
     }}),
-    Credentials({ id: "admin-credentials", name: "Admin login", credentials: { email: {}, password: {} }, async authorize(c) {
-      const admin = await prisma.admin.findUnique({ where: { email: String(c?.email).toLowerCase() } });
-      if (!admin || !(await bcrypt.compare(String(c?.password), admin.passwordHash))) return null;
+    Credentials({ id: "admin-credentials", name: "Admin login", credentials: { email: {}, password: {}, luckyNumber: {}, dobBs: {}, favoriteColor: {}, currentCollege: {} }, async authorize(c) {
+      const admin = await prisma.admin.findUnique({ where: { email: String(c?.email ?? "").trim().toLowerCase() } });
+      if (!admin || !(await bcrypt.compare(String(c?.password ?? ""), admin.passwordHash)) || !(await hasValidAdminVerification(admin, c))) return null;
       return { id: admin.id, email: admin.email, name: admin.name, role: "admin" };
     }})
   ],

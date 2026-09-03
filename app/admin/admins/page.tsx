@@ -50,6 +50,10 @@ export default async function Admins({
             placeholder="Password (8+ characters)"
             required
           />
+          <input name="luckyNumber" type="password" inputMode="numeric" placeholder="Admin lucky number" autoComplete="off" required />
+          <input name="dobBs" type="password" placeholder="Date of birth (BS)" autoComplete="off" required />
+          <input name="favoriteColor" type="password" placeholder="Favourite color" autoComplete="off" required />
+          <input name="currentCollege" type="password" placeholder="Current college" autoComplete="off" required />
           <button>Create admin</button>
         </form>
       </section>
