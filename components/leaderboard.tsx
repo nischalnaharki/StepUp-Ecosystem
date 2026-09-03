@@ -1,1 +1,44 @@
-export function Leaderboard({ rows, yourRank }: { rows: { rank: number; name: string; value: string; isYou: boolean }[]; yourRank?: { rank: number; value: string } }) { return <section className="card leaderboard"><ol>{rows.map((row) => <li key={`${row.rank}-${row.name}`} className={row.isYou ? "you" : ""}><span>#{row.rank} {row.name}</span><strong>{row.value}</strong></li>)}</ol>{yourRank && !rows.some((row) => row.rank === yourRank.rank) && <p className="your-rank">Your rank: #{yourRank.rank} · {yourRank.value}</p>}</section>; }
+export function Leaderboard({
+  rows,
+  yourRank,
+}: {
+  rows: {
+    rank: number;
+    name: string;
+    value: string;
+    isYou: boolean;
+  }[];
+  yourRank?: {
+    rank: number;
+    value: string;
+  };
+}) {
+  return (
+    <section className="card leaderboard">
+      <ol>
+        {rows.map((row) => (
+          <li
+            key={`${row.rank}-${row.name}`}
+            className={row.isYou ? "you" : ""}
+          >
+            <span>
+              #{row.rank} {row.name}
+            </span>
+
+            <strong>{row.value}</strong>
+          </li>
+        ))}
+      </ol>
+
+      {yourRank &&
+        !rows.some(
+          (row) => row.rank === yourRank.rank,
+        ) && (
+          <p className="your-rank">
+            Your rank: #{yourRank.rank} ·{" "}
+            {yourRank.value}
+          </p>
+        )}
+    </section>
+  );
+}
