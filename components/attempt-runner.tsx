@@ -35,6 +35,8 @@ export function AttemptRunner({
   const answersRef = useRef(answers);
   const flagsRef = useRef(flags);
   const remainingRef = useRef(remaining);
+  const finishingRef = useRef(false);
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
     answersRef.current = answers;
@@ -74,6 +76,7 @@ export function AttemptRunner({
   }
 
   async function finish(auto = false) {
+    if (finishingRef.current) return;
     const unanswered = questions.filter(
       (question) => answersRef.current[question.id] === undefined,
     ).length;
@@ -88,32 +91,44 @@ export function AttemptRunner({
       return;
     }
 
-    await persist({ complete: true, timeRemainingSeconds: Math.max(0, remainingRef.current ?? 0) });
-    router.push(`/course/mock-tests/${attemptId}/results`);
-    router.refresh();
+    finishingRef.current = true;
+    setFinished(true);
+    try {
+      await persist({ complete: true, timeRemainingSeconds: Math.max(0, remainingRef.current ?? 0) });
+    } finally {
+      // Never leave an expired attempt on a disabled question screen. The server
+      // records and scores the submission; the results page then reflects it.
+      router.replace(`/course/mock-tests/${attemptId}/results`);
+      router.refresh();
+    }
   }
 
   useEffect(() => {
     if (remaining === null) return;
+
+    if (remaining <= 0) {
+      void finish(true);
+      return;
+    }
 
     const timer = window.setInterval(() => {
       setRemaining((current) => {
         const next = Math.max(0, (current ?? 0) - 1);
         if (next === 0) {
           window.clearInterval(timer);
-          void finish(true);
         }
         return next;
       });
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [remaining]);
 
   const question = questions[index];
   if (!question) return null;
 
   const selectAnswer = async (originalOptionIndex: number) => {
+    if (finished || remainingRef.current === 0) return;
     const next = { ...answersRef.current, [question.id]: originalOptionIndex };
     setAnswers(next);
     answersRef.current = next;
@@ -121,6 +136,7 @@ export function AttemptRunner({
   };
 
   const toggleFlag = async () => {
+    if (finished || remainingRef.current === 0) return;
     const next = flagsRef.current.includes(question.id)
       ? flagsRef.current.filter((id) => id !== question.id)
       : [...flagsRef.current, question.id];
@@ -149,6 +165,7 @@ export function AttemptRunner({
                 className={`${itemIndex === index ? "active" : ""} ${
                   answers[item.id] !== undefined ? "answered" : ""
                 } ${flags.includes(item.id) ? "flagged" : ""}`}
+                disabled={finished}
                 onClick={() => setIndex(itemIndex)}
               >
                 {itemIndex + 1}
@@ -156,7 +173,7 @@ export function AttemptRunner({
             ))}
           </div>
           <p className="fine">{saving ? "Saving…" : "Answers save automatically"}</p>
-          <button className="button" onClick={() => finish()}>
+          <button className="button" disabled={finished} onClick={() => finish()}>
             Submit test
           </button>
         </aside>
@@ -174,6 +191,7 @@ export function AttemptRunner({
                   type="radio"
                   name="answer"
                   checked={answers[question.id] === originalIndex}
+                  disabled={finished}
                   onChange={() => void selectAnswer(originalIndex)}
                 />{" "}
                 <span>{String.fromCharCode(65 + optionIndex)}.</span> {question.options[originalIndex]}
@@ -185,6 +203,7 @@ export function AttemptRunner({
             <button
               type="button"
               className={flags.includes(question.id) ? "secondary active-flag" : "secondary"}
+              disabled={finished}
               onClick={() => void toggleFlag()}
             >
               {flags.includes(question.id) ? "Remove flag" : "Flag for review"}
@@ -194,14 +213,14 @@ export function AttemptRunner({
               <button
                 type="button"
                 className="secondary"
-                disabled={index === 0}
+                disabled={finished || index === 0}
                 onClick={() => setIndex(index - 1)}
               >
                 Previous
               </button>
               <button
                 type="button"
-                disabled={index === questions.length - 1}
+                disabled={finished || index === questions.length - 1}
                 onClick={() => setIndex(index + 1)}
               >
                 Next

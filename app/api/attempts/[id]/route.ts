@@ -8,8 +8,22 @@ import { revalidatePath } from "next/cache";
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth(); if (session?.user.role !== "student" || !session.user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const { id } = await params; const body = await request.json();
-  const attempt = await prisma.attempt.findFirst({ where: { id, studentId: session.user.id, status: "IN_PROGRESS" } });
+  const attempt = await prisma.attempt.findFirst({ where: { id, studentId: session.user.id, status: "IN_PROGRESS" }, include: { mockTest: { select: { timeLimitMinutes: true } } } });
   if (!attempt) return NextResponse.json({ error: "Attempt not found" }, { status: 404 });
+  const timeLimitSeconds = attempt.mockTest.timeLimitMinutes === null ? null : attempt.mockTest.timeLimitMinutes * 60;
+  const expired = timeLimitSeconds !== null && Date.now() >= attempt.startedAt.getTime() + timeLimitSeconds * 1000;
+
+  // A client-side timer can be paused or bypassed, so reject all answer changes
+  // once the deadline has passed and submit the answers already on record.
+  if (expired) {
+    const completed = await prisma.attempt.updateMany({
+      where: { id, status: "IN_PROGRESS" },
+      data: { status: "COMPLETED", completedAt: new Date(), timeRemainingSeconds: 0 },
+    });
+    const scored = completed.count ? await scoreAttempt(id) : null;
+    if (completed.count) revalidatePath("/course", "layout");
+    return NextResponse.json({ ok: true, completed: true, expired: true, score: scored?.score, maxPossibleScore: scored?.maxPossibleScore });
+  }
   const allowedQuestionIds = new Set(((attempt.questionOrder as { items?: { questionId: string }[] }).items || []).map((item) => item.questionId));
   const suppliedAnswers = body.answers && typeof body.answers === "object" && !Array.isArray(body.answers) ? body.answers as Record<string, unknown> : null;
   const answers = suppliedAnswers && Object.entries(suppliedAnswers).every(([questionId, optionIndex]) => allowedQuestionIds.has(questionId) && Number.isInteger(optionIndex) && Number(optionIndex) >= 0 && Number(optionIndex) <= 3) ? suppliedAnswers : attempt.answers;

@@ -823,7 +823,9 @@ button {
 .score-card strong { display: block; font-size: 48px; }
 .review-list { display: grid; gap: 14px; margin-top: 24px; }
 .review-question { max-width: none; }
-.wrong-option { color: #b13a2a; font-weight: 700; }
+.review-option { color: var(--ink); }
+.review-option.student-answer { color: #f2c94c; font-weight: 700; }
+.correct-tick { display: inline-block; margin-left: 7px; color: #3ca55c; font-size: 12px; font-weight: 900; letter-spacing: -3px; }
 .leaderboard { max-width: 650px; margin: 26px 0; }
 .leaderboard ol { margin: 0; padding: 0; list-style: none; }
 .leaderboard li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
