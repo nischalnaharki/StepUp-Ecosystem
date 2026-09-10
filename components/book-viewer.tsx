@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 export function BookViewer() {
   const container = useRef<HTMLDivElement>(null);
@@ -11,6 +11,7 @@ export function BookViewer() {
   const [currentPage, setCurrentPage] = useState(1);
   const [markedPage, setMarkedPage] = useState<number | null>(null);
   const [pageInput, setPageInput] = useState("1");
+  const [zoom, setZoom] = useState(1);
 
   const savePage = useCallback((page: number, mark?: number | null) => {
     void fetch("/api/book/progress", {
@@ -185,8 +186,10 @@ export function BookViewer() {
             className="secondary small"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
+            aria-label="Previous page"
+            title="Previous page"
           >
-            ← Previous
+            ←
           </button>
 
           <form onSubmit={submitPage}>
@@ -209,9 +212,20 @@ export function BookViewer() {
             className="secondary small"
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
+            aria-label="Next page"
+            title="Next page"
           >
-            Next →
+            →
           </button>
+
+          <div className="book-zoom" aria-label="Page zoom controls">
+            <button type="button" className="secondary small" onClick={() => setZoom((value) => Math.max(0.75, value - 0.25))} disabled={zoom <= 0.75} aria-label="Zoom out" title="Zoom out">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="M16 16l5 5M8 11h6" /></svg>
+            </button>
+            <button type="button" className="secondary small" onClick={() => setZoom((value) => Math.min(2, value + 0.25))} disabled={zoom >= 2} aria-label="Zoom in" title="Zoom in">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="M16 16l5 5M8 11h6M11 8v6" /></svg>
+            </button>
+          </div>
 
           <label className="book-mark">
             <input
@@ -236,7 +250,7 @@ export function BookViewer() {
 
       {message && <p className="book-message">{message}</p>}
 
-      <div ref={container} className="book-pages" />
+      <div ref={container} className="book-pages" style={{ "--book-zoom": zoom } as CSSProperties} />
     </section>
   );
 }
