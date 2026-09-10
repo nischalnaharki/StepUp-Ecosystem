@@ -173,7 +173,7 @@ export function BookViewer() {
         <div className="book-navigation" aria-label="Book navigation">
           <button
             type="button"
-            className="secondary small"
+            className="secondary small book-first-page"
             onClick={() => goToPage(1)}
             disabled={currentPage === 1}
           >
@@ -228,7 +228,7 @@ export function BookViewer() {
             </button>
           )}
 
-          <p aria-live="polite">
+          <p className="book-page-status" aria-live="polite">
             Page {currentPage} of {totalPages}
           </p>
         </div>
